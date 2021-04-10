@@ -17,7 +17,7 @@ public class Client
 	private DatagramPacket receivePacket = null;
 	private InetAddress host = null;
 	
-	private String myName = "client";
+	private String myName = "GTXT";
 	// private int counterMsg = 0;		optional use
 	private String receivedMsg = "";
 	private int myColor = 0;

@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/TUC-Chess-AI2021.iml" filepath="$PROJECT_DIR$/.idea/TUC-Chess-AI2021.iml" />
+      <module fileurl="file://$PROJECT_DIR$/TUC-ChessClient-AI21/TUC-ChessClient-AI21.iml" filepath="$PROJECT_DIR$/TUC-ChessClient-AI21/TUC-ChessClient-AI21.iml" />
     </modules>
   </component>
 </project>

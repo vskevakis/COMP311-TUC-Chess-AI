@@ -13,6 +13,7 @@ public class World
 	private int nTurns = 0;
 	private int nBranches = 0;
 	private int noPrize = 9;
+	private String chosenMove;
 	
 	public World()
 	{
@@ -91,8 +92,18 @@ public class World
 		nTurns++;
 		nBranches += availableMoves.size();
 		
-		return this.selectRandomAction();
+//		return this.selectRandomAction();
+		double ev_move = this.minmax(3, true, "");
+		if (chosenMove == null) {
+			System.out.println("Random Move");
+			return selectRandomAction();
+		}
+		else {
+			System.out.println(chosenMove);
+			return chosenMove;
+		}
 	}
+
 	
 	private void whiteMoves()
 	{
@@ -570,6 +581,99 @@ public class World
 		// check if a prize has been added in the game
 		if(prizeX != noPrize)
 			board[prizeX][prizeY] = "P";
+	}
+
+	/* Our minmax algorithm */
+	public double minmax(int depth, boolean maxPlayer, String move) {
+
+		if (depth == 0 || terminalState()) {
+			System.out.println(evaluate(move));
+			return evaluate(move);
+		}
+		if (maxPlayer) {
+			double value = Double.MIN_VALUE;
+			for (int i = 0; i < availableMoves.size(); i++) {
+				double tempvalue = minmax(depth -1, false, availableMoves.get(i));
+				System.out.println("Temp value = " + tempvalue + " and Value = " + value);
+				if (tempvalue > value) {
+					value = tempvalue;
+					System.out.println(move);
+					chosenMove = move;
+				}
+			}
+			return value;
+		}
+		else {
+			double value = Double.MAX_VALUE;
+			for (int i = 0; i < availableMoves.size(); i++) {
+				double tempvalue = minmax(depth -1, true, availableMoves.get(i));
+				if (tempvalue < value) {
+					value = tempvalue;
+				}
+			}
+			return value;
+		}
+	}
+
+	/* Checking if we are on terminal state */
+	public boolean terminalState() {
+//		String board[][] = board;
+
+		int kings = 0;
+		int other = 0;
+		for (int row = 0; row < 7; row++) {
+			for (int col = 0; col < 5; col++) {
+				if (board[row][col].equals("BK") || board[row][col].equals("WK")) {
+					kings++;
+				}else if (!board[row][col].equals(" ") && !board[row][col].equals("P")) {
+					other++;
+				}
+			}
+		}
+		if ((kings == 2 && other == 0) || kings <= 1) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	/* Basic move evaluation based on points
+	 * String move = "3758"
+	 * row/col --> row/col
+	 * */
+	public double evaluate(String move) {
+
+		int size = move.length();
+		int [] moveInt = new int [size];
+		for (int i = 0; i < size; i++) {
+			moveInt[i] = Integer.parseInt(Character.toString(move.charAt(i)));
+		}
+
+		int col = moveInt[2];
+		int row = moveInt[3];
+		if (board[moveInt[0]][moveInt[1]].equals("BP") && col == 6)  {
+			return 1;
+		}
+		else if (board[moveInt[0]][moveInt[1]].equals("WP") && col == 0)  {
+			return 1;
+		}
+		else if (board[col][row].equals(" ")) {
+			return 0;
+		}
+		else if (board[col][row].equals("P")) {
+			return 0.7;
+		}
+		else if (board[col][row].charAt(1) == 'P') {
+			return 1;
+		}
+		else if (board[col][row].charAt(1) == 'K') {
+			return 7;
+		}
+		else if (board[col][row].charAt(1) == 'R') {
+			return 3;
+		}
+		return  0;
 	}
 	
 }
