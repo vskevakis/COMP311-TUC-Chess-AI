@@ -1,10 +1,12 @@
 import java.util.ArrayList;
 import java.util.Random;
-
+import java.util.Arrays;
+//import java.io.*;
 
 public class World
 {
 	private String[][] board = null;
+//	private String[][] board2 = null;
 	private int rows = 7;
 	private int columns = 5;
 	private int myColor = 0;
@@ -18,6 +20,7 @@ public class World
 	public World()
 	{
 		board = new String[rows][columns];
+//		board2 = new String[rows][columns];
 		
 		/* represent the board
 		
@@ -93,13 +96,14 @@ public class World
 		nBranches += availableMoves.size();
 		
 //		return this.selectRandomAction();
-		double ev_move = this.minmax(3, true, "");
+
+		double ev_move = this.minmax(board,3, true, "");
 		if (chosenMove == null) {
 			System.out.println("Random Move");
 			return selectRandomAction();
 		}
 		else {
-			System.out.println(chosenMove);
+			System.out.println("Chosenmove : "+chosenMove);
 			return chosenMove;
 		}
 	}
@@ -584,29 +588,44 @@ public class World
 	}
 
 	/* Our minmax algorithm */
-	public double minmax(int depth, boolean maxPlayer, String move) {
-
+	public double minmax( String tmpboard[][],int depth, boolean maxPlayer, String move) {
+		String[][] board2 = null;
+		board2 = new String[rows][columns];
+		int [] moveInt = new int [4];
+		for (int i = 0; i < rows; i++){
+			board2[i] = Arrays.copyOf(tmpboard[i], columns);
+		}
 		if (depth == 0 || terminalState()) {
-			System.out.println(evaluate(move));
+//			System.out.println(evaluate(move));
 			return evaluate(move);
 		}
 		if (maxPlayer) {
-			double value = Double.MIN_VALUE;
+			double value = -100;
 			for (int i = 0; i < availableMoves.size(); i++) {
-				double tempvalue = minmax(depth -1, false, availableMoves.get(i));
-				System.out.println("Temp value = " + tempvalue + " and Value = " + value);
+				move=availableMoves.get(i);
+//				System.out.println("Next move to try:"+move);
+				for (int j = 0; j < move.length(); j++) {
+					moveInt[j] = Integer.parseInt(Character.toString(move.charAt(j)));
+				}
+				board2[moveInt[2]][moveInt[3]]=board[moveInt[0]][moveInt[1]];
+				double tempvalue = minmax(board2,depth -1, false, availableMoves.get(i));
+//				System.out.println("Temp value = " + tempvalue + " and Value = " + value);
 				if (tempvalue > value) {
 					value = tempvalue;
-					System.out.println(move);
+//					System.out.println(move);
 					chosenMove = move;
 				}
 			}
 			return value;
 		}
 		else {
-			double value = Double.MAX_VALUE;
+			double value = 100;
 			for (int i = 0; i < availableMoves.size(); i++) {
-				double tempvalue = minmax(depth -1, true, availableMoves.get(i));
+				for (int j = 0; j < move.length(); j++) {
+					moveInt[j] = Integer.parseInt(Character.toString(move.charAt(j)));
+				}
+				board2[moveInt[2]][moveInt[3]]=board[moveInt[0]][moveInt[1]];
+				double tempvalue = minmax(board2,depth -1, true, availableMoves.get(i));
 				if (tempvalue < value) {
 					value = tempvalue;
 				}
