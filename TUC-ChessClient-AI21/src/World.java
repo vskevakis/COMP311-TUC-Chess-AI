@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Arrays;
 //import java.io.*;
@@ -14,6 +15,7 @@ public class World
 	private int rookBlocks = 3;		// rook can move towards <rookBlocks> blocks in any vertical or horizontal direction
 	private int nTurns = 0;
 	private int nBranches = 0;
+	private int maxdepth = 5;
 	private int noPrize = 9;
 	private String chosenMove;
 	
@@ -96,8 +98,9 @@ public class World
 		nBranches += availableMoves.size();
 		
 //		return this.selectRandomAction();
-
-		double ev_move = this.minmax(board,3, true, "");
+		double a=-1000,b=1000;
+		List<String> moveList = new ArrayList<>();
+		double ev_move = this.minmax(board,maxdepth, true, moveList,a,b,0);
 		if (chosenMove == null) {
 			System.out.println("Random Move");
 			return selectRandomAction();
@@ -588,7 +591,10 @@ public class World
 	}
 
 	/* Our minmax algorithm */
-	public double minmax( String tmpboard[][],int depth, boolean maxPlayer, String move) {
+	public double minmax( String tmpboard[][],int depth, boolean maxPlayer, List<String> movelist,double a,double b,double totalvalue) {
+		// TODO fix evaluate to all nodes not only the last ->fixxed something
+		// TODO Propably need to recalculate the available moves
+		String move;
 		String[][] board2 = null;
 		board2 = new String[rows][columns];
 		int [] moveInt = new int [4];
@@ -597,7 +603,7 @@ public class World
 		}
 		if (depth == 0 || terminalState()) {
 //			System.out.println(evaluate(move));
-			return evaluate(move);
+			return totalvalue;
 		}
 		if (maxPlayer) {
 			double value = -100;
@@ -607,13 +613,20 @@ public class World
 				for (int j = 0; j < move.length(); j++) {
 					moveInt[j] = Integer.parseInt(Character.toString(move.charAt(j)));
 				}
-				board2[moveInt[2]][moveInt[3]]=board[moveInt[0]][moveInt[1]];
-				double tempvalue = minmax(board2,depth -1, false, availableMoves.get(i));
+				board2[moveInt[2]][moveInt[3]]=tmpboard[moveInt[0]][moveInt[1]];
+				movelist.add(move);
+				totalvalue=totalvalue+evaluate(move);
+				double tempvalue = minmax(board2,depth -1, false, movelist,a ,b,totalvalue);
 //				System.out.println("Temp value = " + tempvalue + " and Value = " + value);
 				if (tempvalue > value) {
 					value = tempvalue;
 //					System.out.println(move);
-					chosenMove = move;
+					chosenMove = movelist.get(0);
+				}
+				a= Math.max(a, value);
+//				System.out.println("a : "+a+" ,  b : " + b);
+				if (b<=a){
+					break;
 				}
 			}
 			return value;
@@ -621,13 +634,20 @@ public class World
 		else {
 			double value = 100;
 			for (int i = 0; i < availableMoves.size(); i++) {
+				move=availableMoves.get(i);
 				for (int j = 0; j < move.length(); j++) {
 					moveInt[j] = Integer.parseInt(Character.toString(move.charAt(j)));
 				}
 				board2[moveInt[2]][moveInt[3]]=board[moveInt[0]][moveInt[1]];
-				double tempvalue = minmax(board2,depth -1, true, availableMoves.get(i));
+				totalvalue=totalvalue-evaluate(move);
+				double tempvalue = minmax(board2,depth -1, true, movelist,a,b,totalvalue);
 				if (tempvalue < value) {
 					value = tempvalue;
+				}
+				b= Math.min(b, value);
+				if (b<=a){
+//					System.out.println("break in");
+					break;
 				}
 			}
 			return value;
