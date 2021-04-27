@@ -14,9 +14,11 @@ public class World
 	private int rookBlocks = 3;		// rook can move towards <rookBlocks> blocks in any vertical or horizontal direction
 	private int nTurns = 0;
 	private int nBranches = 0;
-	private int maxdepth = 5;
+	private int maxdepth = 7;	//9 is doable but takes too much time 7 is ok
 	private int noPrize = 9;
 	private String chosenMove;
+
+	//TODO this number probably need updating too
 	private  int[][] pawn = {{50, 50, 50, 50, 50},
 			{30, 30, 30, 30, 30},
 			{20, 10, 30, 10, 20},
@@ -1029,8 +1031,7 @@ public class World
 
 	/* Our minmax algorithm */
 	public double minmax( String tmpboard[][],int depth, boolean maxPlayer,double a,double b) {
-		// TODO fix evaluate to all nodes not only the last ->fixxed something
-		// TODO Propably need to recalculate the available moves
+		// TODO Try to find the small bug with the illegal moves
 		ArrayList<String> availableMove = null;
 
 
@@ -1042,32 +1043,32 @@ public class World
 			board2[i] = Arrays.copyOf(tmpboard[i], columns);
 		}
 		if (depth == 0 || terminalState(tmpboard)) {
-			System.out.println(evaluate(tmpboard));
+//			System.out.println(evaluate(tmpboard));
 			return evaluate(tmpboard);
 		}
 		if (myColor==0){
 			if(maxPlayer) {        // I am the white player
-				System.out.println("white available moves");
+//				System.out.println("white available moves");
 				availableMove = this.whiteMoves2(board2);
 			}else {                    // he is the black player
-				System.out.println("black available moves");
+//				System.out.println("black available moves");
 				availableMove = this.blackMoves2(board2);
 			}
 		}else{
 			if(maxPlayer) {        // I am the black player
-				System.out.println("black available moves");
+//				System.out.println("black available moves");
 				availableMove = this.blackMoves2(board2);
 			}else {                    // he is the white player
-				System.out.println("white available moves");
+//				System.out.println("white available moves");
 				availableMove = this.whiteMoves2(board2);
 			}
 		}
-		System.out.println(availableMove.toString());
+//		System.out.println(availableMove.toString());
 		if (maxPlayer) {
 			double value = -100000;
 			for (int i = 0; i < availableMove.size(); i++) {
 				move=availableMove.get(i);
-				System.out.println("Next move to max try:"+move);
+//				System.out.println("Next move to max try:"+move);
 				for (int j = 0; j < move.length(); j++) {
 					moveInt[j] = Integer.parseInt(Character.toString(move.charAt(j)));
 				}
@@ -1079,11 +1080,11 @@ public class World
 					board2[moveInt[0]][moveInt[1]]=" ";
 				}
 				double tempvalue = minmax(board2,depth -1, false,a ,b);
-				System.out.println("Temp value = " + tempvalue + " and Value = " + value);
+//				System.out.println("Temp value = " + tempvalue + " and Value = " + value);
 				if (tempvalue > value) {
 					value = tempvalue;
 					chosenMove= move;
-					System.out.println("chosen move"+move);
+//					System.out.println("chosen move"+move);
 //					chosenMove = movelist.get(0);
 				}
 				a= Math.max(a, value);
@@ -1098,7 +1099,7 @@ public class World
 			double value = 100000;
 			for (int i = 0; i < availableMove.size(); i++) {
 				move=availableMove.get(i);
-				System.out.println("Next move to min try:"+move);
+//				System.out.println("Next move to min try:"+move);
 				for (int j = 0; j < move.length(); j++) {
 					moveInt[j] = Integer.parseInt(Character.toString(move.charAt(j)));
 				}
@@ -1119,7 +1120,7 @@ public class World
 					break;
 				}
 			}
-			System.out.println("return at the end with value"+value);
+//			System.out.println("return at the end with value"+value);
 			return value;
 		}
 	}
@@ -1159,6 +1160,7 @@ public class World
 	 * 1000(K-K')+500(R-R')+100(P-P')+10(M-M')+50(B-B'+I-I'+D-D')
 	 */
 	public double evaluate (String tmpboard[][]) {
+		// TODO Need to fix /update the evaluation function
 		double result = 0;
 		int king = 0;
 		int rooks = 0;
