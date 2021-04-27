@@ -134,6 +134,7 @@ public class World
 		double a=-1000,b=1000;
 //		List<String> moveList = new ArrayList<>();
 		double ev_move = this.minmax(board,maxdepth, true,a,b);
+		System.out.println("-------------------------------------------------------------------------------------------------------------------------------------------------------------");
 		if (chosenMove == null) {
 			System.out.println("Random Move");
 			return selectRandomAction();
@@ -1024,15 +1025,25 @@ public class World
 	public double minmax( String tmpboard[][],int depth, boolean maxPlayer,double a,double b) {
 		// TODO fix evaluate to all nodes not only the last ->fixxed something
 		// TODO Propably need to recalculate the available moves
-		ArrayList<String> availableMove;
-
-		if(maxPlayer) {        // I am the white player
-			System.out.println("white available moves");
-			availableMove = this.whiteMoves2(tmpboard);
-		}else {                    // I am the black player
-			System.out.println("black abailable moves");
-			availableMove = this.blackMoves2(tmpboard);
+		ArrayList<String> availableMove = null;
+		if (myColor==0){
+			if(maxPlayer) {        // I am the white player
+				System.out.println("white available moves");
+				availableMove = this.whiteMoves2(tmpboard);
+			}else {                    // he is the black player
+				System.out.println("black available moves");
+				availableMove = this.blackMoves2(tmpboard);
+			}
+		}else{
+			if(maxPlayer) {        // I am the black player
+				System.out.println("black available moves");
+				availableMove = this.blackMoves2(tmpboard);
+			}else {                    // he is the white player
+				System.out.println("white available moves");
+				availableMove = this.whiteMoves2(tmpboard);
+			}
 		}
+		System.out.println(availableMove.toString());
 		String move;
 		String[][] board2 = null;
 		board2 = new String[rows][columns];
@@ -1040,19 +1051,25 @@ public class World
 		for (int i = 0; i < rows; i++){
 			board2[i] = Arrays.copyOf(tmpboard[i], columns);
 		}
-		if (depth == 0 || terminalState()) {
+		if (depth == 0 || terminalState(tmpboard)) {
 			System.out.println(evaluate(tmpboard));
 			return evaluate(tmpboard);
 		}
 		if (maxPlayer) {
-			double value = -100;
+			double value = -100000;
 			for (int i = 0; i < availableMove.size(); i++) {
 				move=availableMove.get(i);
-				System.out.println("Next move to try:"+move);
+				System.out.println("Next move to max try:"+move);
 				for (int j = 0; j < move.length(); j++) {
 					moveInt[j] = Integer.parseInt(Character.toString(move.charAt(j)));
 				}
-				board2[moveInt[2]][moveInt[3]]=tmpboard[moveInt[0]][moveInt[1]];
+				if ((tmpboard[moveInt[0]][moveInt[1]]=="WP" && moveInt[2]==0)||(tmpboard[moveInt[0]][moveInt[1]]=="BP" && moveInt[2]==6) ){
+					board2[moveInt[0]][moveInt[1]]=" ";
+					board2[moveInt[2]][moveInt[3]]=" ";
+				}else{
+					board2[moveInt[2]][moveInt[3]]=tmpboard[moveInt[0]][moveInt[1]];
+					board2[moveInt[0]][moveInt[1]]=" ";
+				}
 				double tempvalue = minmax(board2,depth -1, false,a ,b);
 				System.out.println("Temp value = " + tempvalue + " and Value = " + value);
 				if (tempvalue > value) {
@@ -1070,13 +1087,20 @@ public class World
 			return value;
 		}
 		else {
-			double value = 100;
+			double value = 100000;
 			for (int i = 0; i < availableMove.size(); i++) {
 				move=availableMove.get(i);
+				System.out.println("Next move to min try:"+move);
 				for (int j = 0; j < move.length(); j++) {
 					moveInt[j] = Integer.parseInt(Character.toString(move.charAt(j)));
 				}
-				board2[moveInt[2]][moveInt[3]]=tmpboard[moveInt[0]][moveInt[1]];
+				if ((tmpboard[moveInt[0]][moveInt[1]]=="WP" && moveInt[2]==0)||(tmpboard[moveInt[0]][moveInt[1]]=="BP" && moveInt[2]==6) ){
+					board2[moveInt[0]][moveInt[1]]=" ";
+					board2[moveInt[2]][moveInt[3]]=" ";
+				}else{
+					board2[moveInt[2]][moveInt[3]]=tmpboard[moveInt[0]][moveInt[1]];
+					board2[moveInt[0]][moveInt[1]]=" ";
+				}
 				double tempvalue = minmax(board2,depth -1, true,a,b);
 				if (tempvalue < value) {
 					value = tempvalue;
@@ -1087,21 +1111,22 @@ public class World
 					break;
 				}
 			}
+			System.out.println("return at the end with value"+value);
 			return value;
 		}
 	}
 
 	/* Checking if we are on terminal state */
-	public boolean terminalState() {
+	public boolean terminalState(String tmpboard[][]) {
 //		String board[][] = board;
 
 		int kings = 0;
 		int other = 0;
 		for (int row = 0; row < 7; row++) {
 			for (int col = 0; col < 5; col++) {
-				if (board[row][col].equals("BK") || board[row][col].equals("WK")) {
+				if (tmpboard[row][col].equals("BK") || tmpboard[row][col].equals("WK")) {
 					kings++;
-				}else if (!board[row][col].equals(" ") && !board[row][col].equals("P")) {
+				}else if (!tmpboard[row][col].equals(" ") && !tmpboard[row][col].equals("P")) {
 					other++;
 				}
 			}
