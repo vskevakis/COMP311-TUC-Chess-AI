@@ -140,8 +140,14 @@ public class World
 			return selectRandomAction();
 		}
 		else {
-			System.out.println("Chosenmove : "+chosenMove);
-			return chosenMove;
+			if (availableMoves.contains(chosenMove)){
+				System.out.println("Chosenmove : "+chosenMove);
+				return chosenMove;
+			}else{
+				System.out.println("Random Move because of error");
+				return selectRandomAction();
+			}
+
 		}
 	}
 
@@ -1026,24 +1032,8 @@ public class World
 		// TODO fix evaluate to all nodes not only the last ->fixxed something
 		// TODO Propably need to recalculate the available moves
 		ArrayList<String> availableMove = null;
-		if (myColor==0){
-			if(maxPlayer) {        // I am the white player
-				System.out.println("white available moves");
-				availableMove = this.whiteMoves2(tmpboard);
-			}else {                    // he is the black player
-				System.out.println("black available moves");
-				availableMove = this.blackMoves2(tmpboard);
-			}
-		}else{
-			if(maxPlayer) {        // I am the black player
-				System.out.println("black available moves");
-				availableMove = this.blackMoves2(tmpboard);
-			}else {                    // he is the white player
-				System.out.println("white available moves");
-				availableMove = this.whiteMoves2(tmpboard);
-			}
-		}
-		System.out.println(availableMove.toString());
+
+
 		String move;
 		String[][] board2 = null;
 		board2 = new String[rows][columns];
@@ -1055,6 +1045,24 @@ public class World
 			System.out.println(evaluate(tmpboard));
 			return evaluate(tmpboard);
 		}
+		if (myColor==0){
+			if(maxPlayer) {        // I am the white player
+				System.out.println("white available moves");
+				availableMove = this.whiteMoves2(board2);
+			}else {                    // he is the black player
+				System.out.println("black available moves");
+				availableMove = this.blackMoves2(board2);
+			}
+		}else{
+			if(maxPlayer) {        // I am the black player
+				System.out.println("black available moves");
+				availableMove = this.blackMoves2(board2);
+			}else {                    // he is the white player
+				System.out.println("white available moves");
+				availableMove = this.whiteMoves2(board2);
+			}
+		}
+		System.out.println(availableMove.toString());
 		if (maxPlayer) {
 			double value = -100000;
 			for (int i = 0; i < availableMove.size(); i++) {
@@ -1063,7 +1071,7 @@ public class World
 				for (int j = 0; j < move.length(); j++) {
 					moveInt[j] = Integer.parseInt(Character.toString(move.charAt(j)));
 				}
-				if ((tmpboard[moveInt[0]][moveInt[1]]=="WP" && moveInt[2]==0)||(tmpboard[moveInt[0]][moveInt[1]]=="BP" && moveInt[2]==6) ){
+				if ((tmpboard[moveInt[0]][moveInt[1]]=="WP" && moveInt[2]==0) || (tmpboard[moveInt[0]][moveInt[1]]=="BP" && moveInt[2]==6) ){
 					board2[moveInt[0]][moveInt[1]]=" ";
 					board2[moveInt[2]][moveInt[3]]=" ";
 				}else{
