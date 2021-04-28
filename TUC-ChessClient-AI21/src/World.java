@@ -1044,7 +1044,12 @@ public class World
 		}
 		if (depth == 0 || terminalState(tmpboard)) {
 //			System.out.println(evaluate(tmpboard));
-			return evaluate(tmpboard);
+            return evaluate(tmpboard);
+//            if (myColor==0) {
+//                return evaluate(tmpboard);
+//            }else{
+//                return -evaluate(tmpboard);
+//            }
 		}
 		if (myColor==0){
 			if(maxPlayer) {        // I am the white player
@@ -1159,6 +1164,13 @@ public class World
 	/* based on the linear function
 	 * 1000(K-K')+500(R-R')+100(P-P')+10(M-M')+50(B-B'+I-I'+D-D')
 	 */
+    /*
+        Checking our alive kings,rooks,pawns, checking enemy's alive r_kings,r_rooks,r_pawns
+        Checking backward_pawns, which are pawns that are left far behind other allied forces and can't help in battle
+        Checking doubled_pawns, which are pawns that are in pairs (Can protect each other)
+        Checking isolated_pawns, which are pawns that are not protected from other allied forces
+        Checking mobility. Encourage our agent to choose a move that ensures that he has more options for the next move
+         */
 	public double evaluate (String tmpboard[][]) {
 		// TODO Need to fix /update the evaluation function
 		double result = 0;
