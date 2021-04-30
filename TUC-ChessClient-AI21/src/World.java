@@ -12,9 +12,10 @@ public class World
 	private int rookBlocks = 3;		// rook can move towards <rookBlocks> blocks in any vertical or horizontal direction
 	private int nTurns = 0;
 	private int nBranches = 0;
-	private int maxdepth = 4;	//9 is doable but takes too much time 7 is ok
+	private int maxdepth = 5;	//9 is doable but takes too much time 7 is ok
 	private int noPrize = 9;
 	private String chosenMove;
+	private boolean staticminmax=true;
 
 	//TODO this number probably need updating too
 	private  int[][] pawn = {{50, 50, 50, 50, 50},
@@ -140,23 +141,30 @@ public class World
 //		return this.selectRandomAction();
 		double a=-1000,b=1000;
 //		List<String> moveList = new ArrayList<>();
-//		double ev_move = this.minmax(board,maxdepth, true,a,b);
+		if (staticminmax){
+			double ev_move = this.minmax(board,maxdepth, true,a,b);
+		}else{
+			// Trying Monte Carlo instead of minmax
+			MonteCarloTreeSearch MTS = new MonteCarloTreeSearch();
+			chosenMove = MTS.findNextMove(board, myColor);
+		}
+//
 		// Trying Monte Carlo instead of minmax
-		MonteCarloTreeSearch MTS = new MonteCarloTreeSearch();
-		chosenMove = MTS.findNextMove(board, myColor);
+//		MonteCarloTreeSearch MTS = new MonteCarloTreeSearch();
+//		chosenMove = MTS.findNextMove(board, myColor);
 		System.out.println("-------------------------------------------------------------------------------------------------------------------------------------------------------------");
 		if (chosenMove == null) {
 			System.out.println("Random Move");
 			return selectRandomAction();
 		}
 		else {
-			if (availableMoves.contains(chosenMove)){
-				System.out.println("Chosenmove : "+chosenMove);
-				return chosenMove;
-			}else{
-				System.out.println("Random Move because of error");
-				return selectRandomAction();
-			}
+//			if (availableMoves.contains(chosenMove)){
+			System.out.println("Chosenmove : "+chosenMove);
+			return chosenMove;
+//			}else{
+//				System.out.println("Random Move because of error");
+//				return selectRandomAction();
+//			}
 
 		}
 	}
@@ -1046,18 +1054,32 @@ public class World
 		String move;
 		String[][] board2 = null;
 		board2 = new String[rows][columns];
-		int [] moveInt = new int [4];
-		for (int i = 0; i < rows; i++){
+		int[] moveInt = new int[4];
+		for (int i = 0; i < rows; i++) {
 			board2[i] = Arrays.copyOf(tmpboard[i], columns);
 		}
 		if (depth == 0 || terminalState(tmpboard)) {
 //			System.out.println(evaluate(tmpboard));
-            return evaluate(tmpboard);
+			return evaluate(tmpboard);
 //            if (myColor==0) {
 //                return evaluate(tmpboard);
 //            }else{
 //                return -evaluate(tmpboard);
 //            }
+		}
+		if (depth == 0){
+			if (maxPlayer) {
+				if (myColor == 0){
+					return Quiesce(board2, myColor, a, b, 3);
+				}else {
+					return Quiesce(board2, myColor, a, b, 4);
+				}
+			} else { // min player here
+				if (myColor == 0)
+					return Quiesce(board2, 1, a, b, 3);
+				else
+					return Quiesce(board2, 0, a, b, 4);
+			}
 		}
 		if (myColor==0){
 			if(maxPlayer) {        // I am the white player
@@ -1163,6 +1185,72 @@ public class World
 		}
 	}
 
+	public double Quiesce (String[][] tmpboard, int side, double alpha, double beta, int depth) {
+		int [] moveInt = new int [4];
+		String move;
+		String[][] board2 = null;
+		board2 = new String[rows][columns];
+		for (int i = 0; i < rows; i++){
+			board2[i] = Arrays.copyOf(tmpboard[i], columns);
+		}
+
+		// evaluate the current state
+		double stand_pat = evaluate(tmpboard);
+
+		if (depth == 0) return stand_pat;
+		if (stand_pat >= beta) {
+			return beta;
+		}
+		if (alpha < stand_pat) {
+			alpha = stand_pat;
+		}
+		ArrayList<String> tmpavailableMove = null;
+		// generate available moves
+		if (side == 0) {
+			tmpavailableMove=whiteMoves2(tmpboard);
+		}else {
+			tmpavailableMove=blackMoves2(tmpboard);
+		}
+
+		double score;
+		for (int i = 0; i < tmpavailableMove.size(); i++) {
+			// analyzing the move
+			int action_int = Integer.parseInt(tmpavailableMove.get(i));
+			int y2 = action_int % 10;
+			int x2 = (action_int % 100 - y2) / 10;
+
+			// if it is a non capture move check the next one
+			if (tmpboard[x2][y2].charAt(0)!='W' && tmpboard[x2][y2].charAt(0)!='B') {
+				continue;
+			}
+			move=tmpavailableMove.get(i);
+			for (int j = 0; j < move.length(); j++) {
+				moveInt[j] = Integer.parseInt(Character.toString(move.charAt(j)));
+			}
+			if ((tmpboard[moveInt[0]][moveInt[1]]=="WP" && moveInt[2]==0) || (tmpboard[moveInt[0]][moveInt[1]]=="BP" && moveInt[2]==6) ){
+				board2[moveInt[0]][moveInt[1]]=" ";
+				board2[moveInt[2]][moveInt[3]]=" ";
+			}else{
+				board2[moveInt[2]][moveInt[3]]=tmpboard[moveInt[0]][moveInt[1]];
+				board2[moveInt[0]][moveInt[1]]=" ";
+			}
+			// calling recursively
+			if (side == 0) {
+				score = -Quiesce(board2, 1, -beta, -alpha, depth-1);
+			}else {
+				score = -Quiesce (board2, 0, -beta, -alpha, depth-1);
+			}
+			// we hit a hard bound ?
+			if (score >= beta) {
+				return beta;
+			}
+			// updating alpha
+			if (score > alpha) {
+				alpha = score;
+			}
+		}
+		return alpha;
+	}
 	/* Basic move evaluation based on points
 	 * String move = "3758"
 	 * row/col --> row/col
@@ -1348,7 +1436,6 @@ public class World
 				}
 			}
 		}
-
 		return result;
 	}
 

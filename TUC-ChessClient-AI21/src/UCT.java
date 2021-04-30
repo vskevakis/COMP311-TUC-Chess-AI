@@ -12,6 +12,9 @@ public class UCT {
     }
 
     public static Node findBestNodeWithUCT(Node node) {
+//        if (node.getParent()==null ||node.getChildren()==null){
+//            return null;
+//        }
         int parentVisit = node.getParent().getVisitCount();
         return Collections.max(
                 node.getChildren(),
