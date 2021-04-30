@@ -14,7 +14,7 @@ public class World
 	private int rookBlocks = 3;		// rook can move towards <rookBlocks> blocks in any vertical or horizontal direction
 	private int nTurns = 0;
 	private int nBranches = 0;
-	private int maxdepth = 7;	//9 is doable but takes too much time 7 is ok
+	private int maxdepth = 4;	//9 is doable but takes too much time 7 is ok
 	private int noPrize = 9;
 	private String chosenMove;
 
@@ -44,7 +44,7 @@ public class World
 			{20, 30, 0, 30, 20}
 
 	};
-	private  int[][] king_endgame = {{-40, -50, -40, -30},
+	private  int[][] king_endgame = {{-30,-40, -50, -40, -30},
 			{-10, -30, 0, -30, -10},
 			{-10, -30, 30, -30, -10},
 			{-10, -30, 40, -30, -10},
@@ -116,6 +116,12 @@ public class World
 	
 	public void setMyColor(int myColor)
 	{
+		if (myColor==0 && this.maxdepth%2==0){
+			this.maxdepth = this.maxdepth +1;
+		}
+		if (myColor==1 && this.maxdepth%2==1){
+			this.maxdepth = this.maxdepth +1;
+		}
 		this.myColor = myColor;
 	}
 	
@@ -1088,7 +1094,9 @@ public class World
 //				System.out.println("Temp value = " + tempvalue + " and Value = " + value);
 				if (tempvalue > value) {
 					value = tempvalue;
-					chosenMove= move;
+					if (depth==maxdepth){
+						chosenMove= move;
+					}
 //					System.out.println("chosen move"+move);
 //					chosenMove = movelist.get(0);
 				}
@@ -1275,10 +1283,26 @@ public class World
 
 		}
 		// compute mobility of each player (mobility = number of legal moves)
+		int mobility = 0, r_mobility = 0;
+		ArrayList<String> availableMove = null;
+//		if (myColor == 0) {
+		availableMove=whiteMoves2(tmpboard);
+		mobility= availableMove.size();
+		availableMove.clear();
+		availableMove=blackMoves2(tmpboard);
+		r_mobility = availableMove.size();
+//		}else {
+//			availableMove=whiteMoves2(tmpboard);
+//			r_mobility= availableMove.size();
+//			availableMove.clear();
+//			availableMove=blackMoves2(tmpboard);
+//			mobility = availableMove.size();
+//		}
 
 		result += 20000 * (king - r_king);
 		result += 1000 * (rooks - r_rooks);
 		result += 100 * (pawns - r_pawns);
+		result += 10 * (mobility - r_mobility);
 		if (myColor == 1) { // in case we have black
 			result = -result;
 		}
