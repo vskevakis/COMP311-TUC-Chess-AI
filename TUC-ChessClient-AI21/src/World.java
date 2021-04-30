@@ -1,16 +1,14 @@
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.Arrays;
+import java.util.*;
 //import java.io.*;
 
 public class World
 {
 	private String[][] board = null;
 //	private String[][] board2 = null;
-	private int rows = 7;
-	private int columns = 5;
-	private int myColor = 0;
-	private ArrayList<String> availableMoves = null;
+	public int rows = 7;
+	public int columns = 5;
+	public int myColor = 0;
+	public ArrayList<String> availableMoves = null;
 	private int rookBlocks = 3;		// rook can move towards <rookBlocks> blocks in any vertical or horizontal direction
 	private int nTurns = 0;
 	private int nBranches = 0;
@@ -53,6 +51,7 @@ public class World
 			{-30, -50, -30, -50, -30}
 
 	};
+
 	public World()
 	{
 
@@ -141,7 +140,10 @@ public class World
 //		return this.selectRandomAction();
 		double a=-1000,b=1000;
 //		List<String> moveList = new ArrayList<>();
-		double ev_move = this.minmax(board,maxdepth, true,a,b);
+//		double ev_move = this.minmax(board,maxdepth, true,a,b);
+		// Trying Monte Carlo instead of minmax
+		MonteCarloTreeSearch MTS = new MonteCarloTreeSearch();
+		chosenMove = MTS.findNextMove(board, myColor);
 		System.out.println("-------------------------------------------------------------------------------------------------------------------------------------------------------------");
 		if (chosenMove == null) {
 			System.out.println("Random Move");
@@ -575,7 +577,7 @@ public class World
 	}
 
 
-	private ArrayList<String> whiteMoves2(String[][] tmpboard)
+	public ArrayList<String> whiteMoves2(String[][] tmpboard)
 	{
 		String firstLetter = "";
 		String secondLetter = "";
@@ -782,7 +784,7 @@ public class World
 		return tempmoves;
 	}
 
-	private ArrayList<String> blackMoves2(String[][] tmpboard)
+	public ArrayList<String> blackMoves2(String[][] tmpboard)
 	{
 		String firstLetter = "";
 		String secondLetter = "";
@@ -1349,4 +1351,28 @@ public class World
 
 		return result;
 	}
+
+
+
+
+
+//	public static double uctValue(
+//			int totalVisit, double nodeValue, int nodeVisit) {
+//		if (nodeVisit == 0) {
+//			return Integer.MAX_VALUE;
+//		}
+//		return ((double) nodeValue / (double) nodeVisit)
+//				+ 1.41 * Math.sqrt(Math.log(totalVisit) / (double) nodeVisit);
+//	}
+//
+//	public static Node findBestNodeWithUCT(Node node) {
+//		int parentVisit = node.getParent().getVisitCount();
+//		return Collections.max(
+//				node.getChildren(),
+//				Comparator.comparing(c -> uctValue(parentVisit,
+//						c.getNodeValue(), c.getVisitCount())));
+//	}
+
+
 }
+
