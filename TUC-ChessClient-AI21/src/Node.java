@@ -108,7 +108,7 @@ public class Node {
                 maxValue = this.childArray.get(i).getNodeValue();
                 selectedNode = this.childArray.get(i);
             }
-            System.out.println("some other value @bestChild: " + maxValue);
+//            System.out.println("some other value @bestChild: " + maxValue);
 //            System.out.println("some other value @bestChild: " + this.childArray.get(i).getNodeValue());
 
 //            System.out.println("randomChild @bestChild: " + this.childArray.get(i).getRandomChild().getNodeValue());
@@ -116,4 +116,29 @@ public class Node {
 
         return selectedNode;
     }
+//
+//    public Node getBestChild2() {
+//        double maxValueout = Double.NEGATIVE_INFINITY;
+//        Node selectedNodeout = null;
+//        for (int i = 0; i < this.childArray.size(); i++) {
+//            double maxValue = Double.NEGATIVE_INFINITY;
+////            Node selectedNode = null;
+//            for (int j = 0; j < this.childArray.get(i).getChildren().size(); j++) {
+//                if (this.childArray.get(i).getChildren().get(j).getNodeValue() > maxValue) {
+//                    maxValue = this.childArray.get(i).getChildren().get(j).getNodeValue();
+////                    selectedNode = this.childArray.get(i).getChildren().get(j);
+//                }
+//            }
+//            if (maxValue > maxValueout) {
+//                maxValueout = maxValue;
+//                selectedNodeout = this.childArray.get(i);
+//            }
+//            System.out.println("some other value @bestChild: " + maxValueout);
+////            System.out.println("some other value @bestChild: " + this.childArray.get(i).getNodeValue());
+//
+////            System.out.println("randomChild @bestChild: " + this.childArray.get(i).getBestChild().getNodeValue());
+//        }
+//
+//        return selectedNodeout;
+//    }
 }

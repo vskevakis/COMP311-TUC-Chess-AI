@@ -8,7 +8,7 @@ public class UCT {
             return Double.MAX_VALUE;
         }
         return ((double) nodeValue)
-                + 100 * Math.sqrt(Math.log(totalVisit) / (double) nodeVisit);
+                + 2 * Math.sqrt(Math.log(totalVisit) / (double) nodeVisit);
     }
 
     public static Node findBestNodeWithUCT(Node node) {

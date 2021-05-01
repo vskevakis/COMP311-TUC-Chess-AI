@@ -7,9 +7,16 @@ public class MonteCarloTreeSearch {
     public String findNextMove(String[][] board, int playerColor,World world) {
         UCT uct = new UCT();
         // define an end time which will act as a terminating condition
-        Node rootNode = new Node(board, null, playerColor, null);
-
-        for (int i = 0; i < 2000; i++) {
+        Node rootNode;
+        if (playerColor==1){
+            rootNode = new Node(board, null, 0, null);
+        }else{
+            rootNode = new Node(board, null, 1, null);
+        }
+//        Boolean flag=true;
+        long time = System.currentTimeMillis();
+//        for (int i = 0; i < 10000; i++) {
+        while(System.currentTimeMillis()-time <5700){
             //TODO What should I do if I am opponent? nothing we good just chill and let maxi int
 
 //            Node promisingNode = selectPromisingNode(rootNode,world);//.clone(selectPromisingNode(rootNode,world));
@@ -25,8 +32,18 @@ public class MonteCarloTreeSearch {
 			 */
 //                System.out.println("player Color is: " + promisingNode.getPlayerColor() + "World color is: "+ world.myColor);
                 if (promisingNode.getPlayerColor() != world.myColor) {
+//                    flag=false;
+//                    if (promisingNode.getPlayerColor() == 1){
+//                        for (int j=0;j<world.whiteMoves2(promisingNode.getBoard()).size();j++){
+//
+//                        }
+//                    }else{
+//
+//                    }
+
                     promisingNode = promisingNode.getRandomChild();
                 } else {
+//                    flag=true;
                     promisingNode = uct.findBestNodeWithUCT(promisingNode);
                 }
             }
@@ -40,7 +57,7 @@ public class MonteCarloTreeSearch {
                 ArrayList<String> availableMoves;
                 int newColor;
 
-                if (promisingNode.getPlayerColor() == 0) {    // I am the white player
+                if (promisingNode.getPlayerColor() == 1) {    // I am the white player
                     availableMoves = world.whiteMoves2(promisingNode.getBoard());
                     newColor = 1;
                 } else {            // I am the black player
@@ -65,16 +82,17 @@ public class MonteCarloTreeSearch {
 //            rootNode = backPropagation(nodeToExplore, playoutResult,world).clone(backPropagation(nodeToExplore, playoutResult,world));
 
             /* Backpropagation */
+//            if (!flag) {
             Node tempNode = nodeToExplore;//.clone(nodeToExplore);
             while (tempNode != null) {
                 tempNode.incVisitCount();
-                if (tempNode.getPlayerColor() == world.myColor) {
+                if (tempNode.getPlayerColor() != world.myColor) {
                     tempNode.updateNodeValue(playoutResult);
                 }
 
                 tempNode = tempNode.getParent(); //.clone(tempNode.getParent());//no link
             }
-
+//            }
 //            rootNode.printNode();
 
         }
@@ -137,21 +155,24 @@ public class MonteCarloTreeSearch {
 //			tempNode.getParent().getState().setWinScore(Integer.MIN_VALUE);
 //			return boardStatus;
 //		}
+        ArrayList<String> availableMoves = null;
         //TODO Check if above is needed
         int player = node.getPlayerColor();
-        while (!world.terminalState(rndboard)) {
+        int counter=0;
+        while (!world.terminalState(rndboard) || counter <20) {
+            counter=counter +1;
             if (player == 0) {    // I am the white player
-                world.availableMoves = world.whiteMoves2(rndboard);
+                availableMoves = world.whiteMoves2(rndboard);
                 player = 1;
             } else {            // I am the black player
-                world.availableMoves = world.blackMoves2(rndboard);
+                availableMoves = world.blackMoves2(rndboard);
                 player = 0;
             }
-            if (world.availableMoves.size()==0){
+            if (availableMoves.size()==0){
                 break;
             }
-            int index = (int) (Math.random() * world.availableMoves.size());
-            rndboard = moveOnBoard(rndboard, world.availableMoves.get(index),world);
+            int index = (int) (Math.random() * availableMoves.size());
+            rndboard = moveOnBoard(rndboard, availableMoves.get(index),world);
         }
         return world.evaluate(rndboard);
     }
