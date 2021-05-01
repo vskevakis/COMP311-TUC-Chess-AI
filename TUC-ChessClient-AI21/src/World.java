@@ -15,7 +15,7 @@ public class World
 	private int maxdepth = 5;	//9 is doable but takes too much time 7 is ok
 	private int noPrize = 9;
 	private String chosenMove;
-	private boolean staticminmax=true;
+	private boolean staticminmax=false;
 
 	//TODO this number probably need updating too
 	private  int[][] pawn = {{50, 50, 50, 50, 50},
@@ -146,7 +146,7 @@ public class World
 		}else{
 			// Trying Monte Carlo instead of minmax
 			MonteCarloTreeSearch MTS = new MonteCarloTreeSearch();
-			chosenMove = MTS.findNextMove(board, myColor);
+			chosenMove = MTS.findNextMove(board, myColor,this);
 		}
 //
 		// Trying Monte Carlo instead of minmax

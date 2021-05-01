@@ -5,20 +5,16 @@ public class UCT {
     public static double uctValue(
             int totalVisit, double nodeValue, int nodeVisit) {
         if (nodeVisit == 0) {
-            return Integer.MAX_VALUE;
+            return Double.MAX_VALUE;
         }
-        return ((double) nodeValue / (double) nodeVisit)
-                + 1.41 * Math.sqrt(Math.log(totalVisit) / (double) nodeVisit);
+        return ((double) nodeValue)
+                + 100 * Math.sqrt(Math.log(totalVisit) / (double) nodeVisit);
     }
 
     public static Node findBestNodeWithUCT(Node node) {
-//        if (node.getParent()==null ||node.getChildren()==null){
-//            return null;
-//        }
-        int parentVisit = node.getParent().getVisitCount();
-        return Collections.max(
-                node.getChildren(),
-                Comparator.comparing(c -> uctValue(parentVisit,
-                        c.getNodeValue(), c.getVisitCount())));
+
+        int parentVisit = node.getVisitCount();
+        return Collections.max(node.getChildren(),
+                Comparator.comparing(c -> uctValue(parentVisit, c.getNodeValue(), c.getVisitCount())));
     }
 }
