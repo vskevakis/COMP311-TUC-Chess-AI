@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="TUC-ChessClient-AI21:jar">
-    <output-path>$PROJECT_DIR$/TUC-ChessClient-AI21/output/artifacts/TUC_ChessClient_AI21_jar</output-path>
+  <artifact type="jar" name="TUC-Chess_monte:jar">
+    <output-path>$PROJECT_DIR$/TUC-ChessClient-AI21/output/artifacts/TUC_Chess_monte_jar</output-path>
     <root id="archive" name="TUC-ChessClient-AI21.jar">
       <element id="module-output" name="TUC-ChessClient-AI21" />
     </root>

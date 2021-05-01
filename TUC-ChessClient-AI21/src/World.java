@@ -1,10 +1,8 @@
 import java.util.*;
-//import java.io.*;
 
 public class World
 {
 	private String[][] board = null;
-//	private String[][] board2 = null;
 	public int rows = 7;
 	public int columns = 5;
 	public int myColor = 0;
@@ -15,9 +13,8 @@ public class World
 	private int maxdepth = 5;	//9 is doable but takes too much time 7 is ok
 	private int noPrize = 9;
 	private String chosenMove;
-	private boolean staticminmax=false;
-
-	//TODO this number probably need updating too
+	private boolean staticminmax=true; //if min max or montecarlo is called || true =minmax false =montecarlo
+	//TODO add comments mostly
 	private  int[][] pawn = {{50, 50, 50, 50, 50},
 			{30, 30, 30, 30, 30},
 			{20, 10, 30, 10, 20},
@@ -57,7 +54,6 @@ public class World
 	{
 
 		board = new String[rows][columns];
-//		board2 = new String[rows][columns];
 		
 		/* represent the board
 		
@@ -137,35 +133,24 @@ public class World
 		// keeping track of the branch factor
 		nTurns++;
 		nBranches += availableMoves.size();
-		
-//		return this.selectRandomAction();
+
 		double a=-1000,b=1000;
-//		List<String> moveList = new ArrayList<>();
 		if (staticminmax){
+			//calling min max
 			double ev_move = this.minmax(board,maxdepth, true,a,b);
 		}else{
 			// Trying Monte Carlo instead of minmax
 			MonteCarloTreeSearch MTS = new MonteCarloTreeSearch();
 			chosenMove = MTS.findNextMove(board, myColor,this);
 		}
-//
-		// Trying Monte Carlo instead of minmax
-//		MonteCarloTreeSearch MTS = new MonteCarloTreeSearch();
-//		chosenMove = MTS.findNextMove(board, myColor);
 		System.out.println("-------------------------------------------------------------------------------------------------------------------------------------------------------------");
 		if (chosenMove == null) {
 			System.out.println("Random Move");
 			return selectRandomAction();
 		}
 		else {
-//			if (availableMoves.contains(chosenMove)){
 			System.out.println("Chosenmove : "+chosenMove);
 			return chosenMove;
-//			}else{
-//				System.out.println("Random Move because of error");
-//				return selectRandomAction();
-//			}
-
 		}
 	}
 
@@ -1047,10 +1032,7 @@ public class World
 
 	/* Our minmax algorithm */
 	public double minmax( String tmpboard[][],int depth, boolean maxPlayer,double a,double b) {
-		// TODO Try to find the small bug with the illegal moves
 		ArrayList<String> availableMove = null;
-
-
 		String move;
 		String[][] board2 = null;
 		board2 = new String[rows][columns];
@@ -1059,13 +1041,7 @@ public class World
 			board2[i] = Arrays.copyOf(tmpboard[i], columns);
 		}
 		if (depth == 0 || terminalState(tmpboard)) {
-//			System.out.println(evaluate(tmpboard));
 			return evaluate(tmpboard);
-//            if (myColor==0) {
-//                return evaluate(tmpboard);
-//            }else{
-//                return -evaluate(tmpboard);
-//            }
 		}
 		if (depth == 0){
 			if (maxPlayer) {
@@ -1083,27 +1059,21 @@ public class World
 		}
 		if (myColor==0){
 			if(maxPlayer) {        // I am the white player
-//				System.out.println("white available moves");
 				availableMove = this.whiteMoves2(board2);
 			}else {                    // he is the black player
-//				System.out.println("black available moves");
 				availableMove = this.blackMoves2(board2);
 			}
 		}else{
 			if(maxPlayer) {        // I am the black player
-//				System.out.println("black available moves");
 				availableMove = this.blackMoves2(board2);
 			}else {                    // he is the white player
-//				System.out.println("white available moves");
 				availableMove = this.whiteMoves2(board2);
 			}
 		}
-//		System.out.println(availableMove.toString());
 		if (maxPlayer) {
 			double value = -100000;
 			for (int i = 0; i < availableMove.size(); i++) {
 				move=availableMove.get(i);
-//				System.out.println("Next move to max try:"+move);
 				for (int j = 0; j < move.length(); j++) {
 					moveInt[j] = Integer.parseInt(Character.toString(move.charAt(j)));
 				}
@@ -1115,17 +1085,13 @@ public class World
 					board2[moveInt[0]][moveInt[1]]=" ";
 				}
 				double tempvalue = minmax(board2,depth -1, false,a ,b);
-//				System.out.println("Temp value = " + tempvalue + " and Value = " + value);
 				if (tempvalue > value) {
 					value = tempvalue;
 					if (depth==maxdepth){
 						chosenMove= move;
 					}
-//					System.out.println("chosen move"+move);
-//					chosenMove = movelist.get(0);
 				}
 				a= Math.max(a, value);
-//				System.out.println("a : "+a+" ,  b : " + b);
 				if (b<=a){
 					break;
 				}
@@ -1136,7 +1102,6 @@ public class World
 			double value = 100000;
 			for (int i = 0; i < availableMove.size(); i++) {
 				move=availableMove.get(i);
-//				System.out.println("Next move to min try:"+move);
 				for (int j = 0; j < move.length(); j++) {
 					moveInt[j] = Integer.parseInt(Character.toString(move.charAt(j)));
 				}
@@ -1153,18 +1118,15 @@ public class World
 				}
 				b= Math.min(b, value);
 				if (b<=a){
-//					System.out.println("break in");
 					break;
 				}
 			}
-//			System.out.println("return at the end with value"+value);
 			return value;
 		}
 	}
 
 	/* Checking if we are on terminal state */
 	public boolean terminalState(String tmpboard[][]) {
-//		String board[][] = board;
 
 		int kings = 0;
 		int other = 0;
@@ -1270,7 +1232,7 @@ public class World
         Checking mobility. Encourage our agent to choose a move that ensures that he has more options for the next move
          */
 	public double evaluate (String tmpboard[][]) {
-		// TODO Need to fix /update the evaluation function
+		// TODO Need to fix /update the evaluation function and maybe quisce
 		double result = 0;
 		int king = 0;
 		int rooks = 0;
@@ -1375,19 +1337,12 @@ public class World
 		// compute mobility of each player (mobility = number of legal moves)
 		int mobility = 0, r_mobility = 0;
 		ArrayList<String> availableMove = null;
-//		if (myColor == 0) {
+
 		availableMove=whiteMoves2(tmpboard);
 		mobility= availableMove.size();
 		availableMove.clear();
 		availableMove=blackMoves2(tmpboard);
 		r_mobility = availableMove.size();
-//		}else {
-//			availableMove=whiteMoves2(tmpboard);
-//			r_mobility= availableMove.size();
-//			availableMove.clear();
-//			availableMove=blackMoves2(tmpboard);
-//			mobility = availableMove.size();
-//		}
 
 		result += 20000 * (king - r_king);
 		result += 1000 * (rooks - r_rooks);
@@ -1401,8 +1356,6 @@ public class World
 		}else {
 			result += 50 * (-doubled_pawns + r_doubled_pawns - isolated_pawns + r_isolated_pawns - backward_pawns + r_backward_pawns);
 		}
-
-
 
 		// finally, we encourage pieces standing well and discourage pieces standing badly
 		// e.g. at the start-middle of the game we encourage the king to stay behind the pawns
@@ -1438,28 +1391,6 @@ public class World
 		}
 		return result;
 	}
-
-
-
-
-
-//	public static double uctValue(
-//			int totalVisit, double nodeValue, int nodeVisit) {
-//		if (nodeVisit == 0) {
-//			return Integer.MAX_VALUE;
-//		}
-//		return ((double) nodeValue / (double) nodeVisit)
-//				+ 1.41 * Math.sqrt(Math.log(totalVisit) / (double) nodeVisit);
-//	}
-//
-//	public static Node findBestNodeWithUCT(Node node) {
-//		int parentVisit = node.getParent().getVisitCount();
-//		return Collections.max(
-//				node.getChildren(),
-//				Comparator.comparing(c -> uctValue(parentVisit,
-//						c.getNodeValue(), c.getVisitCount())));
-//	}
-
 
 }
 
