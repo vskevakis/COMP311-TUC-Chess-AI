@@ -7,8 +7,9 @@ public class Node {
     private  double nodeValue;
     private Node parent;
     private ArrayList<Node> childArray;
+    private String move;
 
-    public Node(String[][] board, Node parentNode, int playerColor){
+    public Node(String[][] board, Node parentNode, int playerColor, String move){
         this.childArray = new ArrayList<Node>();
         this.ourboard = board;
 //        System.out.println("parentNode  "+parentNode);
@@ -17,10 +18,11 @@ public class Node {
         this.playerColor = playerColor;
         this.visitCount = 0;
         this.nodeValue = 0;
+        this.move = move;
     }
 
     public Node clone(Node currentNode){
-        Node newnode = new Node(currentNode.getBoard(),currentNode.getParent(),currentNode.getPlayerColor());
+        Node newnode = new Node(currentNode.getBoard(),currentNode.getParent(),currentNode.getPlayerColor(), currentNode.move);
         newnode.setVisitCount(currentNode.getVisitCount());
         newnode.setNodeValue(currentNode.getNodeValue());
         if (currentNode.getChildren()==null){
@@ -30,6 +32,20 @@ public class Node {
             newnode.addChild(currentNode.getChildren().get(i));
         }
         return newnode;
+    }
+
+    public void printNode() {
+        System.out.println("****");
+        System.out.println("Node: " + this);
+        System.out.println("Visit Count: " + this.visitCount);
+        System.out.println("Children: " + this.childArray);
+        System.out.println("Parent: " + this.parent);
+        System.out.println("Value: " + this.nodeValue);
+        System.out.println("****");
+    }
+
+    public String getMove() {
+        return this.move;
     }
 
     public void incVisitCount() {
@@ -65,8 +81,6 @@ public class Node {
     public void updateNodeValue(double newValue) {
 //        System.out.println("oldthis.nodeValue"+this.nodeValue);
         this.nodeValue += (newValue - this.nodeValue) / this.visitCount;
-
-        System.out.println("nodeValue"+this.nodeValue);
     }
 
     public double getNodeValue() {
@@ -89,13 +103,17 @@ public class Node {
     public Node getBestChild() {
         double maxValue = Double.NEGATIVE_INFINITY;
         Node selectedNode = null;
-        System.out.println("this.childArray.size()"+this.childArray.size());
         for (int i = 0; i < this.childArray.size(); i++) {
             if (this.childArray.get(i).getNodeValue() > maxValue) {
                 maxValue = this.childArray.get(i).getNodeValue();
                 selectedNode = this.childArray.get(i);
             }
+            System.out.println("some other value @bestChild: " + maxValue);
+//            System.out.println("some other value @bestChild: " + this.childArray.get(i).getNodeValue());
+
+//            System.out.println("randomChild @bestChild: " + this.childArray.get(i).getRandomChild().getNodeValue());
         }
+
         return selectedNode;
     }
 }

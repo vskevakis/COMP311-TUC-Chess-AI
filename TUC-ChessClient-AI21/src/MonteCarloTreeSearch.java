@@ -5,52 +5,89 @@ public class MonteCarloTreeSearch {
 
 
     public String findNextMove(String[][] board, int playerColor,World world) {
+        UCT uct = new UCT();
         // define an end time which will act as a terminating condition
-        Node rootNode = new Node(board, null, playerColor);
-//        System.out.println(rootNode.getNodeValue());
-        System.out.println(world.availableMoves);
+        Node rootNode = new Node(board, null, playerColor, null);
 
-        for (int i = 0; i < 1000; i++) {
-            //				if (playerColor != myColor) {
-            //					Node promisingNode = selec
-            //				}
+        for (int i = 0; i < 2000; i++) {
             //TODO What should I do if I am opponent? nothing we good just chill and let maxi int
 
-//            System.out.println(rootNode.getNodeValue());
-            Node promisingNode = selectPromisingNode(rootNode,world);//.clone(selectPromisingNode(rootNode,world));
-//            System.out.println("promisingNode    :     "+promisingNode.getChildren().size());
-            if (!world.terminalState(promisingNode.getBoard())) {
-                expandNode(promisingNode, playerColor,world);
+//            Node promisingNode = selectPromisingNode(rootNode,world);//.clone(selectPromisingNode(rootNode,world));
+
+            /* selectPromissingNode */
+            Node promisingNode = rootNode;//.clone(rootNode);
+            int count=0;
+            while (promisingNode.getChildren().size() != 0) {
+                count++;
+			/*
+			If opponent is playing, select a random node (child)
+			Else we find the best node with UCT
+			 */
+//                System.out.println("player Color is: " + promisingNode.getPlayerColor() + "World color is: "+ world.myColor);
+                if (promisingNode.getPlayerColor() != world.myColor) {
+                    promisingNode = promisingNode.getRandomChild();
+                } else {
+                    promisingNode = uct.findBestNodeWithUCT(promisingNode);
+                }
             }
-//            System.out.println("promisingNode    after   :     "+promisingNode.getChildren().size());
-//            System.out.println("rootNode.getChildren().size()"+rootNode.getChildren().size());
-//            for (i=0;i<rootNode.getChildren().size();i++) {
-//                if(rootNode.getChildren().get(i).getNodeValue()!=0){
-//                    System.out.println("getNodeValu"+rootNode.getChildren().get(i).getNodeValue()+"getVisitCount"+rootNode.getChildren().get(i).getVisitCount()+"nodeid"+rootNode);
-//                }
-//            }
+//        System.out.println("count"+count );
+
+
+//            rootNode.printNode();
+            if (!world.terminalState(promisingNode.getBoard())) {
+//                promisingNode = expandNode(promisingNode, playerColor,world);//.clone(expandNode(promisingNode, playerColor,world));
+                /* expandNode */
+                ArrayList<String> availableMoves;
+                int newColor;
+
+                if (promisingNode.getPlayerColor() == 0) {    // I am the white player
+                    availableMoves = world.whiteMoves2(promisingNode.getBoard());
+                    newColor = 1;
+                } else {            // I am the black player
+                    availableMoves = world.blackMoves2(promisingNode.getBoard());
+                    newColor = 0;
+                }
+//        System.out.println("node"+node);
+                for (int j = 0; j < availableMoves.size(); j++) {
+                    Node newNode = new Node(moveOnBoard(promisingNode.getBoard(), availableMoves.get(j),world), promisingNode, newColor, availableMoves.get(j));
+                    promisingNode.addChild(newNode);
+//            System.out.println("node    : "+node+"    childnode   : "+newNode +"   :::: "+ node.getChildren());
+                }
+            }
+//            promisingNode.printNode();
+//            rootNode.printNode();
+
             Node nodeToExplore = promisingNode;//.clone(promisingNode);
             if (promisingNode.getChildren().size() > 0) {
                 nodeToExplore = promisingNode.getRandomChild();
             }
-//            System.out.println("promisingNode    :     "+nodeToExplore.getParent()+"    "+promisingNode+"           "+nodeToExplore);
             double playoutResult = simulateRandomPlayout(nodeToExplore,world);
-//            System.out.println("playoutResult"+playoutResult);
-            backPropagation(nodeToExplore, playoutResult,world);
-//            for (i=0;i<rootNode.getChildren().size();i++) {
-//                if(promisingNode.getChildren().get(i).getNodeValue()!=0){
-//                    System.out.println("getNodeValu"+promisingNode.getChildren().get(i).getNodeValue()+"getVisitCount"+promisingNode.getChildren().get(i).getVisitCount()+"nodeid"+nodeToExplore);
-//                }
-//            }
+//            rootNode = backPropagation(nodeToExplore, playoutResult,world).clone(backPropagation(nodeToExplore, playoutResult,world));
+
+            /* Backpropagation */
+            Node tempNode = nodeToExplore;//.clone(nodeToExplore);
+            while (tempNode != null) {
+                tempNode.incVisitCount();
+                if (tempNode.getPlayerColor() == world.myColor) {
+                    tempNode.updateNodeValue(playoutResult);
+                }
+
+                tempNode = tempNode.getParent(); //.clone(tempNode.getParent());//no link
+            }
+
+//            rootNode.printNode();
+
         }
 
-        Node bestNode = rootNode.getBestChild().clone(rootNode.getBestChild());
+        Node bestNode = rootNode.getBestChild();//.clone(rootNode.getBestChild());
 
-        return findMoveFromBoard(rootNode.getBoard(), bestNode.getBoard());
+//        return findMoveFromBoard(rootNode.getBoard(), bestNode.getBoard(), world.myColor);
+        return bestNode.getMove();
     }
 
 
-    public String findMoveFromBoard(String[][] oldBoard, String[][] newBoard) {
+
+    public String findMoveFromBoard(String[][] oldBoard, String[][] newBoard, int playerColor) {
         String oldpos = "";
         String newpos = "";
         String move;
@@ -59,63 +96,37 @@ public class MonteCarloTreeSearch {
                 if (oldBoard[row][col] != newBoard[row][col]) {
                     if (newBoard[row][col] == " ") {
                         oldpos = Integer.toString(row) + Integer.toString(col);
-                    } else {
+                    }
+                    else {
                         newpos = Integer.toString(row) + Integer.toString(col);
                     }
+//                    if (newBoard[row][col] == "WP" || oldBoard[row][col] == "BP") {
+//                        if (playerColor == 0 && row == 0)
+//                            newpos = Integer.toString(row) + Integer.toString(col);
+//                        else if (playerColor == 1 && row == 6)
+//                            newpos = Integer.toString(row) + Integer.toString(col);
+//                    }
                 }
             }
         }
         move = oldpos + newpos;
-//        System.out.print("Move is: " + move);
-//        System.out.println("Old Board: ");
-//        for (int row = 0; row < 7; row++) {
-//            for (int col = 0; col < 5; col++) {
-//                System.out.print(oldBoard[row][col]);
-//            }
-//            System.out.print("\n");
-//        }
-//        System.out.println("New Board: ");
-//        for (int row = 0; row < 7; row++) {
-//            for (int col = 0; col < 5; col++) {
-//                System.out.print(newBoard[row][col]);
-//            }
-//            System.out.print("\n");
-//        }
-//        System.out.println("*******");
         return move;
     }
 
-    public void backPropagation(Node nodeToExplore, double totalValue,World world) {
-//        World world = new World();
-//        System.out.println("backPropagation:totalValue: "+totalValue);
-        Node tempNode = nodeToExplore;//.clone(nodeToExplore);
-//        System.out.println("backPropagation:tempNode: "+tempNode);
-        while (tempNode != null) {
-            tempNode.incVisitCount();
-//            System.out.println("tempNode.getPlayerColor()   "+tempNode.getPlayerColor()+" world.myColor    "+world.myColor);
-            if (tempNode.getPlayerColor() == world.myColor) {
-                tempNode.updateNodeValue(totalValue);
-                System.out.println("tempNode    "+tempNode+"    tempNode   getParent "+tempNode.getParent());
-//                System.out.println("tempNode.getNodeValue();    "+tempNode.getNodeValue());
-            }
-//            if(tempNode.getParent()==null){
-//            for (int i=0;i<tempNode.getChildren().size();i++) {
-////                if(tempNode.getChildren().get(i).getNodeValue()!=0){
-////                    System.out.println("getNodeValue    "+tempNode.getChildren().get(i).getNodeValue()+"getVisitCount"+tempNode.getChildren().get(i).getVisitCount()+"nodeid"+nodeToExplore);
-////                }
-//            }}
-//            System.out.println("tempNodetempNode.getParent()   222 "+tempNode.getParent());
-//            tempNode = tempNode.getParent();//no link
-//            System.out.println("tempNodetempNo)   222 "+tempNode);
-            if (tempNode.getParent()!=null){
-                tempNode = tempNode.getParent();//no link
-                System.out.println("tempNode  getChildren 222 "+tempNode.getChildren());
-            }else {
-                break;
-            }
-
-        }
-    }
+//    public Node backPropagation(Node nodeToExplore, double totalValue,World world) {
+//        Node tempNode = nodeToExplore.clone(nodeToExplore);
+//        while (tempNode != null) {
+//            tempNode.incVisitCount();
+//            if (tempNode.getPlayerColor() == world.myColor) {
+//                tempNode.updateNodeValue(totalValue);
+//            }
+//            if (tempNode.getParent() != null)
+//                tempNode = tempNode.getParent().clone(tempNode.getParent());//no link
+//            else
+//                break;
+//        }
+//        return tempNode;
+//    }
 
     public double simulateRandomPlayout(Node node,World world) {
 //        World world = new World();
@@ -145,52 +156,52 @@ public class MonteCarloTreeSearch {
         return world.evaluate(rndboard);
     }
 
-    public Node selectPromisingNode(Node rootNode,World world) {
-//        World world = new World();
-        Node node = rootNode.clone(rootNode);
-        UCT uct = new UCT();
-        int count=0;
-//        System.out.println("selectPromisingNode"+node.getNodeValue());
-        while (node.getChildren().size() != 0) {
-            count++;
-//            System.out.println("selectPromisingNode"+node.getNodeValue());
-			/*
-			If opponent is playing, select a random node (child)
-			Else we find the best node with UCT
-			 */
-            if (node.getPlayerColor() != world.myColor) {
-//                System.out.println("selectPromisingNode"+node.getNodeValue());
-                node = node.getRandomChild();
-            } else {
-//                System.out.println("else");
-                node = uct.findBestNodeWithUCT(node);
-            }
-        }
-//        System.out.println("count"+count );
-        return node;
-    }
+//    public Node selectPromisingNode(Node rootNode,World world) {
+//        Node node = rootNode.clone(rootNode);
+//        UCT uct = new UCT();
+//        int count=0;
+//        if (node.getChildren().size() == 0) {
+//            return rootNode;
+//        }
+//        while (node.getChildren().size() != 0) {
+//            count++;
+//			/*
+//			If opponent is playing, select a random node (child)
+//			Else we find the best node with UCT
+//			 */
+//            System.out.println("player Color is: " + node.getPlayerColor() + "World color is: "+ world.myColor);
+//            if (node.getPlayerColor() != world.myColor) {
+//                node = node.getRandomChild();
+//            } else {
+//                node = uct.findBestNodeWithUCT(node);
+//            }
+//        }
+////        System.out.println("count"+count );
+//        return node;
+//    }
 
 
-    public void expandNode(Node node, int myColor,World world) {
-//        World world = new World();
-        ArrayList<String> availableMoves;
-        int newColor;
-
-        if (myColor == 0) {    // I am the white player
-            availableMoves = world.whiteMoves2(node.getBoard());
-            newColor = 1;
-        } else {            // I am the black player
-            availableMoves = world.blackMoves2(node.getBoard());
-            newColor = 0;
-        }
-//        System.out.println("node"+node);
-        for (int i = 0; i < availableMoves.size(); i++) {
-            Node newNode = new Node(moveOnBoard(node.getBoard(), availableMoves.get(i),world), node, newColor);
-            node.addChild(newNode);
-//            System.out.println("node    : "+node+"    childnode   : "+newNode +"   :::: "+ node.getChildren());
-        }
-
-    }
+//    public Node expandNode(Node node, int myColor,World world) {
+////        World world = new World();
+//        ArrayList<String> availableMoves;
+//        int newColor;
+//
+//        if (myColor == 0) {    // I am the white player
+//            availableMoves = world.whiteMoves2(node.getBoard());
+//            newColor = 1;
+//        } else {            // I am the black player
+//            availableMoves = world.blackMoves2(node.getBoard());
+//            newColor = 0;
+//        }
+////        System.out.println("node"+node);
+//        for (int i = 0; i < availableMoves.size(); i++) {
+//            Node newNode = new Node(moveOnBoard(node.getBoard(), availableMoves.get(i),world), node, newColor);
+//            node.addChild(newNode);
+////            System.out.println("node    : "+node+"    childnode   : "+newNode +"   :::: "+ node.getChildren());
+//        }
+//        return node;
+//
+//    }
 
     public String[][] moveOnBoard(String[][] tmpboard, String move ,World world) {
 //        World world = new World();
