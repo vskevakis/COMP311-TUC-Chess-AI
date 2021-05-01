@@ -3,6 +3,7 @@
     <output-path>$PROJECT_DIR$/TUC-ChessClient-AI21/output/artifacts/TUC_Chess_minmax_jar</output-path>
     <root id="archive" name="TUC-ChessClient-AI21.jar">
       <element id="module-output" name="TUC-ChessClient-AI21" />
+      <element id="artifact" artifact-name="TUC-Chess_monte:jar" />
     </root>
   </artifact>
 </component>

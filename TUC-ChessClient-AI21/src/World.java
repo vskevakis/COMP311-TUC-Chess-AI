@@ -13,7 +13,7 @@ public class World
 	private int maxdepth = 5;	//9 is doable but takes too much time 7 is ok
 	private int noPrize = 9;
 	private String chosenMove;
-	private boolean staticminmax=true; //if min max or montecarlo is called || true =minmax false =montecarlo
+	private boolean staticminmax=false; //if min max or montecarlo is called || true =minmax false =montecarlo
 	//TODO add comments mostly
 	private  int[][] pawn = {{50, 50, 50, 50, 50},
 			{30, 30, 30, 30, 30},
